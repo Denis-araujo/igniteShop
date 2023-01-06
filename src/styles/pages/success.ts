@@ -1,6 +1,5 @@
 import { styled } from "..";
 
-
 export const SuccessContainer = styled('main', {
   display: 'flex',
   flexDirection: 'column',

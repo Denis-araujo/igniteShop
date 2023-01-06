@@ -6,6 +6,10 @@ import Stripe from "stripe";
 import { stripe } from "../lib/stripe";
 import * as S from "../styles/pages/success";
 
+import LayoutSuccess from "../Layouts/LayoutSuccess"
+import { ReactElement, ReactNode } from "react";
+import { NextPageWithLayout } from "./_app";
+
 interface SuccessProps {
   customerName: string;
   product: {
@@ -14,7 +18,7 @@ interface SuccessProps {
   }
 }
 
-export default function Success({ customerName, product }: SuccessProps) {
+const Success: NextPageWithLayout = ({ customerName, product }: SuccessProps) => {
   return (
     <>
       <Head>
@@ -72,3 +76,13 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     }
   }
 }
+
+Success.getLayout = function getLayout(page: ReactElement) {
+  return (
+    <LayoutSuccess>
+      {page}
+    </LayoutSuccess>
+  )
+}
+
+export default Success

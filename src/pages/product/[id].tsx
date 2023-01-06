@@ -2,11 +2,13 @@ import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import Stripe from "stripe";
+import DefaultLayout from "../../Layouts/DefaultLayout";
 import { stripe } from "../../lib/stripe";
 
 import * as S from "../../styles/pages/product"
+import { NextPageWithLayout } from "../_app";
 
 interface ProductProps {
   product: {
@@ -19,7 +21,7 @@ interface ProductProps {
   }
 }
 
-export default function Product({ product }: ProductProps) {
+const Product:NextPageWithLayout = ({ product }: ProductProps) => {
   const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] = useState(false)
 
   async function handleBuyProduct() {
@@ -106,3 +108,13 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ para
     revalidate: 60 * 60 * 1, // 1 hours
   }
 }
+
+Product.getLayout = function getLayout(page: ReactElement) {
+  return (
+    <DefaultLayout>
+      {page}
+    </DefaultLayout>
+  )
+}
+
+export default Product

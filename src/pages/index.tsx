@@ -2,6 +2,7 @@ import { GetStaticProps } from "next"
 import Head from "next/head"
 import Image from "next/image"
 import Link from 'next/link'
+import type { NextPageWithLayout } from './_app'
 
 import { useKeenSlider } from 'keen-slider/react'
 
@@ -10,7 +11,11 @@ import Stripe from "stripe"
 
 import * as S from "../styles/pages/home"
 
+import { Handbag } from "phosphor-react"
+
 import 'keen-slider/keen-slider.min.css'
+import { ReactElement, useState } from "react"
+import DefaultLayout from "../Layouts/DefaultLayout"
 
 interface HomeProps {
   products: {
@@ -21,7 +26,15 @@ interface HomeProps {
   }[]
 }
 
-export default function Home({ products }: HomeProps) {
+interface Products {
+  id: string;
+  name: string;
+  imageUrl: string;
+  price: string;
+}
+
+const Home:NextPageWithLayout = ({ products }: HomeProps) => {
+  const [productsCart, setProductsCart] = useState<Products[]>([])
 
   const [ sliderRef ] = useKeenSlider({
     slides: {
@@ -29,6 +42,13 @@ export default function Home({ products }: HomeProps) {
       spacing: 48,
     },
   })
+
+  function handleAddProductCart(id: string) {
+    const productCurrent = products.filter((product) => product.id === id)
+
+    setProductsCart([...productsCart, productCurrent[0]])
+    console.log(productsCart)
+  }
 
   return (
     <>
@@ -39,16 +59,21 @@ export default function Home({ products }: HomeProps) {
       <S.HomeContainer ref={sliderRef} className="keen-slider">
         {products.map((product) => {
           return (
-            <Link href={`/product/${product.id}`} key={product.id} prefetch={false}>
-              <S.Product className="keen-slider__slide">
+            <S.Product className="keen-slider__slide" key={product.id}>
+              <Link href={`/product/${product.id}`}  prefetch={false}>
                 <Image src={product.imageUrl} width={520} height={480} alt="" />
-
-                <footer>
+              </Link>
+              <footer>
+                <div>
                   <strong>{product.name}</strong>
                   <span>{product.price}</span>
-                </footer>
-              </S.Product>
-            </Link>
+                </div>
+
+                <button onClick={() => handleAddProductCart(product.id)}>
+                  <Handbag size={32} weight="thin" />
+                </button>
+              </footer>
+            </S.Product>
           )
         })}
       </S.HomeContainer>
@@ -83,3 +108,13 @@ export const getStaticProps: GetStaticProps = async () => {
     revalidate: 60 * 60 * 2, // 2 hours
   }
 }
+
+Home.getLayout = function getLayout(page: ReactElement) {
+  return (
+    <DefaultLayout>
+      {page}
+    </DefaultLayout>
+  )
+}
+
+export default Home
