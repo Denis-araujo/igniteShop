@@ -2,8 +2,9 @@ import axios from "axios";
 import { GetStaticPaths, GetStaticProps } from "next";
 import Head from "next/head";
 import Image from "next/image";
-import { ReactElement, useState } from "react";
+import { ReactElement, useContext, useState } from "react";
 import Stripe from "stripe";
+import { ProductsContext } from "../../context/ProductsContext";
 import DefaultLayout from "../../Layouts/DefaultLayout";
 import { stripe } from "../../lib/stripe";
 
@@ -15,33 +16,15 @@ interface ProductProps {
     id: string;
     name: string;
     imageUrl: string;
-    price: string;
+    price: number;
     description: string;
+    priceFormat: string;
     defaultPriceId: string
   }
 }
 
 const Product:NextPageWithLayout = ({ product }: ProductProps) => {
-  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] = useState(false)
-
-  async function handleBuyProduct() {
-    try {
-      setIsCreatingCheckoutSession(true)
-      const response = await axios.post('/api/checkout', {
-        priceId: product.defaultPriceId
-      })
-
-      const { checkoutUrl } = response.data
-
-      window.location.href = checkoutUrl
-    } catch (err) {
-      // Conectar com uma ferramenta de observalidade (Datadog /  Sentry)
-
-      setIsCreatingCheckoutSession(false)
-
-      alert('Falha ao redirecionar ao checkout!')
-    }
-  }
+  const { addProductCart } = useContext(ProductsContext)
 
   return (
     <>
@@ -54,14 +37,13 @@ const Product:NextPageWithLayout = ({ product }: ProductProps) => {
         <Image src={product.imageUrl} width={520} height={480} alt="" />
       </S.ImageContainer>
 
-
       <S.ProductDetails>
         <h1>{product.name}</h1>
-        <span>{product.price}</span>
+        <span>{product.priceFormat}</span>
 
         <p>{product.description}</p>
 
-        <button onClick={handleBuyProduct} disabled={isCreatingCheckoutSession}>
+        <button onClick={() => addProductCart(product)}>
           Comprar agora
         </button>
       </S.ProductDetails>
@@ -97,12 +79,13 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ para
         id: product.id,
         name: product.name,
         imageUrl: product.images[0],
-        price: new Intl.NumberFormat('pt-BR', {
+        priceFormat: new Intl.NumberFormat('pt-BR', {
           style: 'currency',
           currency: 'BRL'
         }).format(price.unit_amount! / 100),
         description: product.description,
-        defaultPriceId: price.id
+        defaultPriceId: price.id,
+        price: price.unit_amount
       }
     },
     revalidate: 60 * 60 * 1, // 1 hours

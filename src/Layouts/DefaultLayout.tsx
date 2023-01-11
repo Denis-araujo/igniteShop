@@ -1,10 +1,10 @@
 import logoImg from '../assets/logo.svg'
 import * as S from '../styles/pages/Layouts/DefaultLayout'
 import Image from 'next/image'
-import { ReactNode, useState } from 'react'
+import { ReactNode, useContext, useState } from 'react'
 import { Handbag, X } from 'phosphor-react'
 
-import camiseta1 from '../assets/camisetas/1.png'
+import { ProductsContext } from '../context/ProductsContext'
 
 interface DefaultLayoutProps {
   children: ReactNode
@@ -12,73 +12,61 @@ interface DefaultLayoutProps {
 
 export default function DefaultLayout({children}: DefaultLayoutProps) {
 
-  const [open, setOpen] = useState(false)
-
-  console.log(open)
+  const { products, priceTotal, handleBuyProduct } = useContext(ProductsContext)
+  const [isOpenCart, setIsOpenCart] = useState(false)
 
   return (
     <S.Container>
       <S.Header>
         <Image src={logoImg} alt="" />
 
-        <S.Cart onClick={() => setOpen((prevValue) => !prevValue)} >
+        <S.Cart onClick={() => setIsOpenCart((prevValue) => !prevValue)} >
           <Handbag size={32} weight="thin" />
         </S.Cart>
+      </S.Header>
 
-        {open && (
+      {isOpenCart && (
           <S.ShoppingBag>
-            <X size={20} onClick={() => setOpen((prevValue) => !prevValue)} />
+            <X size={20} onClick={() => setIsOpenCart((prevValue) => !prevValue)} />
             <p>Sacola de Compras</p>
 
             <S.ListProducts>
-              <S.Product>
-                <Image src={camiseta1} width={101} height={93} alt="" />
+              {products?.map((product) => {
+                return ( 
+                  <S.Product key={product.id}>
+                    <Image src={product.imageUrl} width={101} height={93} alt="" />
 
-                <div>
-                  <span>Camiseta Beyond the Limits</span>
-                  <strong>R$ 79, 90</strong>
-                  <button>Remover</button>
-                </div>
-              </S.Product>
-
-              <S.Product>
-                <Image src={camiseta1} width={101} height={93} alt="" />
-
-                <div>
-                  <span>Camiseta Beyond the Limits</span>
-                  <strong>R$ 79, 90</strong>
-                  <button>Remover</button>
-                </div>
-              </S.Product>
-
-              <S.Product>
-                <Image src={camiseta1} width={101} height={93} alt="" />
-
-                <div>
-                  <span>Camiseta Beyond the Limits</span>
-                  <strong>R$ 79, 90</strong>
-                  <button>Remover</button>
-                </div>
-              </S.Product>
+                    <div>
+                      <span>{product.name}</span>
+                      <strong>{product.priceFormat}</strong>
+                      <button>Remover</button>
+                    </div>
+                  </S.Product>
+                )
+              })}
             </S.ListProducts>
 
             <S.ShoppingBagFooter>
               <div>
                 <span>Quantidade</span>
-                <span>3 items</span>
+                <span>{products.length} item(s)</span>
               </div>
               <div>
                 <strong>Valor Total</strong>
-                <strong>R$ 270,00</strong>
+                <strong>
+                  {new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                  }).format(priceTotal.total)}
+                </strong>
               </div>
 
-              <button>
+              <button onClick={handleBuyProduct}>
                 Finalizar Comprar
               </button>
             </S.ShoppingBagFooter>
           </S.ShoppingBag>
         )}
-      </S.Header>
 
       {children}
     </S.Container>

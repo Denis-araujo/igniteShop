@@ -14,27 +14,23 @@ import * as S from "../styles/pages/home"
 import { Handbag } from "phosphor-react"
 
 import 'keen-slider/keen-slider.min.css'
-import { ReactElement, useState } from "react"
+import { ReactElement, useContext, useState } from "react"
 import DefaultLayout from "../Layouts/DefaultLayout"
+import { Products, ProductsContext } from "../context/ProductsContext"
 
 interface HomeProps {
   products: {
     id: string;
     name: string;
     imageUrl: string;
-    price: string;
+    priceFormat: string;
+    price: number;
+    defaultPriceId: string;
   }[]
 }
 
-interface Products {
-  id: string;
-  name: string;
-  imageUrl: string;
-  price: string;
-}
-
 const Home:NextPageWithLayout = ({ products }: HomeProps) => {
-  const [productsCart, setProductsCart] = useState<Products[]>([])
+  const { addProductCart } = useContext(ProductsContext)
 
   const [ sliderRef ] = useKeenSlider({
     slides: {
@@ -43,11 +39,8 @@ const Home:NextPageWithLayout = ({ products }: HomeProps) => {
     },
   })
 
-  function handleAddProductCart(id: string) {
-    const productCurrent = products.filter((product) => product.id === id)
-
-    setProductsCart([...productsCart, productCurrent[0]])
-    console.log(productsCart)
+  function handleAddProductCart(product: Products){
+    addProductCart(product)
   }
 
   return (
@@ -66,10 +59,10 @@ const Home:NextPageWithLayout = ({ products }: HomeProps) => {
               <footer>
                 <div>
                   <strong>{product.name}</strong>
-                  <span>{product.price}</span>
+                  <span>{product.priceFormat}</span>
                 </div>
 
-                <button onClick={() => handleAddProductCart(product.id)}>
+                <button onClick={() => handleAddProductCart(product)}>
                   <Handbag size={32} weight="thin" />
                 </button>
               </footer>
@@ -88,16 +81,18 @@ export const getStaticProps: GetStaticProps = async () => {
 
   const products = response.data.map((product) => {
 
-    const price = product.default_price as Stripe.Price
+  const price = product.default_price as Stripe.Price
 
-    return {
-      id: product.id,
-      name: product.name,
-      imageUrl: product.images[0],
-      price: new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      }).format(price.unit_amount! / 100),
+  return {
+    id: product.id,
+    name: product.name,
+    imageUrl: product.images[0],
+    priceFormat: new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(price.unit_amount! / 100),
+    price: Number(price.unit_amount),
+    defaultPriceId: price.id,
     }
   })
 
