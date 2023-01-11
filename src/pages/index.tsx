@@ -14,7 +14,7 @@ import * as S from "../styles/pages/home"
 import { Handbag } from "phosphor-react"
 
 import 'keen-slider/keen-slider.min.css'
-import { ReactElement, useContext, useState } from "react"
+import { ReactElement, useContext } from "react"
 import DefaultLayout from "../Layouts/DefaultLayout"
 import { Products, ProductsContext } from "../context/ProductsContext"
 

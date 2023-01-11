@@ -13,7 +13,7 @@ export const Cart = styled('button', {
 })
 
 export const ShoppingBag = styled('div', {
-  position: 'absolute',
+  position: 'fixed',
   right: 0,
   bottom: 0,
   height: '100%',

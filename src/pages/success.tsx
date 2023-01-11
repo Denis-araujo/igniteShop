@@ -10,15 +10,17 @@ import LayoutSuccess from "../Layouts/LayoutSuccess"
 import { ReactElement, ReactNode } from "react";
 import { NextPageWithLayout } from "./_app";
 
-interface SuccessProps {
-  customerName: string;
-  product: {
-    name: string;
-    imageUrl: string;
-  }
+interface ProductProps {
+  name: string;
+  imageUrl: string;
 }
 
-const Success: NextPageWithLayout = ({ customerName, product }: SuccessProps) => {
+interface SuccessProps {
+  customerName: string;
+  products: Array<ProductProps>
+}
+
+const Success: NextPageWithLayout = ({ customerName, products }: SuccessProps) => {
   return (
     <>
       <Head>
@@ -28,14 +30,24 @@ const Success: NextPageWithLayout = ({ customerName, product }: SuccessProps) =>
       </Head>
 
       <S.SuccessContainer>
-        <h1>Compra efetuada</h1>
-
         <S.ImageContainer>
-          <Image src={product.imageUrl} width={120} height={110} alt="" />
+          {products.map((product) => {
+            return (
+              <Image
+                key={product.name}
+                src={product.imageUrl}
+                width={120} 
+                height={110}
+                alt=""
+              />
+            )
+          })}
         </S.ImageContainer>
 
+        <h1>Compra efetuada!</h1>
+
         <p>
-          Uhuul <strong>{customerName}</strong>, sua <strong>{product.name}</strong> já está a caminho da sua casa. 
+          Uhuul <strong>{customerName}</strong>, sua compra de {products.length} camisetas já está a caminho da sua casa.
         </p>
 
         <Link href="/">
@@ -63,18 +75,22 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     expand: ['line_items', 'line_items.data.price.product']
   })
 
-  console.log(session)
 
   const customerName = session.customer_details.name;
-  const product = session.line_items.data[0].price.product as Stripe.Product
 
+  const lineItems = []
+
+  session.line_items.data.map(({ price }: any) => {
+    lineItems.push({
+      name: price.product.name,
+      imageUrl: price.product.images[0]
+    })
+  })
+  
   return {
     props: {
       customerName,
-      product: {
-        name: product.name,
-        imageUrl: product.images[0]
-      },
+      products: lineItems,
     }
   }
 }

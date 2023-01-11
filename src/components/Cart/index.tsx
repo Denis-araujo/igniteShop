@@ -39,7 +39,9 @@ export function Cart({ isOpen }: CartProps) {
 
   return (
     <>
-      <S.Cart onClick={() => setIsOpenCart((prevValue) => !prevValue)} >
+      <S.Cart 
+        onClick={() => setIsOpenCart((prevValue) => !prevValue)}
+      >
         <Handbag size={32} weight="thin" />
       </S.Cart>
 
@@ -52,24 +54,33 @@ export function Cart({ isOpen }: CartProps) {
           <p>Sacola de Compras</p>
 
           <S.ListProducts>
-            {products?.map((product) => {
-              return ( 
-                <S.Product key={product.id}>
-                  <Image 
-                    src={product.imageUrl} 
-                    width={101} 
-                    height={93} 
-                    alt=""
-                  />
+            <>
+              {products.length === 0 ? (
+                <p>Você ainda não escolheu nenhuma camiseta</p>
+              ) : 
+                products?.map((product) => {
+                  return ( 
+                    <S.Product key={product.id}>
+                      <Image 
+                        src={product.imageUrl} 
+                        width={101} 
+                        height={93} 
+                        alt=""
+                      />
 
-                  <div>
-                    <span>{product.name}</span>
-                    <strong>{product.priceFormat}</strong>
-                    <button onClick={() => handleRemoveProduct(product)}>Remover</button>
-                  </div>
-                </S.Product>
-              )
-            })}
+                      <div>
+                        <span>{product.name}</span>
+                        <strong>{product.priceFormat}</strong>
+                        <button onClick={() => handleRemoveProduct(product)}>Remover</button>
+                      </div>
+                    </S.Product>
+                  )
+              })}
+
+              
+            </>
+
+            
           </S.ListProducts>
 
           <S.ShoppingBagFooter>

@@ -29,6 +29,14 @@ export const ProductsContextProvider = ({children}: ProductsContextProviderProps
   const [products, setProducts] = useState<Products[]>([])
 
   function addProductCart(product: Products) {
+
+
+    if(products.includes(product)){
+      return (
+        alert('Produto já adicionado')
+      )
+    }
+
     setProducts([...products, product])
   }
 
