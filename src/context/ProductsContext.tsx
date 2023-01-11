@@ -1,4 +1,3 @@
-import axios from "axios";
 import { createContext, ReactNode, useState } from "react";
 
 export interface Products {
@@ -12,11 +11,11 @@ export interface Products {
 
 interface ProductsContextType {
   products: Products[]
-  addProductCart: (product: Products) => void
   priceTotal: {
     total: number;
   },
-  handleBuyProduct: () => Promise<void>
+  addProductCart: (product: Products) => void
+  removeProductCart: (product: Products) => void
 }
 
 export const ProductsContext = createContext({} as ProductsContextType)
@@ -33,6 +32,12 @@ export const ProductsContextProvider = ({children}: ProductsContextProviderProps
     setProducts([...products, product])
   }
 
+  function removeProductCart(product: Products){
+    const filteredProducts = products.filter((products) => products.id !== product.id)
+
+    setProducts(filteredProducts)
+  }
+
   const priceTotal = products.reduce((acc, product) => {
     acc.total = Number(product.price / 100) + acc.total
 
@@ -41,26 +46,8 @@ export const ProductsContextProvider = ({children}: ProductsContextProviderProps
     total: 0,
   })
 
-  async function handleBuyProduct() {
-    try {
-      const response = await axios.post('/api/checkout', {
-        products: 
-          products
-        ,
-      })
-
-      const { checkoutUrl } = response.data
-
-      window.location.href = checkoutUrl
-    } catch (err) {
-      // Conectar com uma ferramenta de observalidade (Datadog /  Sentry)
-
-      alert('Falha ao redirecionar ao checkout!')
-    }
-  }
-  
   return (
-    <ProductsContext.Provider value={{ products, addProductCart, priceTotal, handleBuyProduct }}>
+    <ProductsContext.Provider value={{ products, addProductCart, priceTotal, removeProductCart }}>
       {children}
     </ProductsContext.Provider>
   )
